@@ -13,12 +13,14 @@ std::list<allocation*> freeChunks;
 std::string strategy;
 
 allocation * firstFit(std::size_t chunkSize){
+    allocation * nullChunk = nullptr;
     for (allocation * chunk : freeChunks){
+        std::cout << chunk;
         if (chunk->size >= chunkSize){
             return chunk;
         }
     }
-    return nullptr;
+    return nullChunk;
 }
 
 allocation * bestFit(std::size_t chunkSize){
@@ -34,6 +36,7 @@ allocation * bestFit(std::size_t chunkSize){
 }
 
 void * alloc(std::size_t chunkSize){
+    std::cout << chunkSize;
     if(chunkSize < 32){
         chunkSize = 32;
     }else if(chunkSize < 64){
@@ -45,6 +48,7 @@ void * alloc(std::size_t chunkSize){
     }else{
         chunkSize = 512;
     }
+    std::cout << chunkSize;
     allocation * chunk;
     if(strategy == "firstfit"){
         chunk = firstFit(chunkSize);
@@ -68,11 +72,11 @@ void * alloc(std::size_t chunkSize){
         return nullptr;
     }
 
-    allocation * newChunk;
-    newChunk->size = chunkSize;
-    newChunk->space = memAlloc;
-    occupiedChunks.push_back(newChunk);
-    return newChunk->space;
+    allocation newChunk;
+    newChunk.size = chunkSize;
+    newChunk.space = memAlloc;
+    occupiedChunks.push_back(&newChunk);
+    return newChunk.space;
 };
 
 void dealloc(void * chunk){
@@ -94,9 +98,12 @@ int main(int argc, char* argv[]){
         std::cerr << "please enter only 'firstfit' or 'bestfit' as the strategy" << std::endl;
         return 1;
     }
-
-    
-
+    std::cout << strategy << std::endl;
+    void * num1 = alloc(32);
+    void * num2 = alloc(64);
+    void * num3 = alloc(128);
+    void * num4 = alloc(256);
+    void * num5 = alloc(512);
 
     return 0;
 }
