@@ -72,11 +72,11 @@ void * alloc(std::size_t chunkSize){
         return nullptr;
     }
 
-    allocation newChunk;
-    newChunk.size = chunkSize;
-    newChunk.space = memAlloc;
-    occupiedChunks.push_back(&newChunk);
-    return newChunk.space;
+    allocation * newChunk = new allocation();
+    newChunk->size = chunkSize;
+    newChunk->space = memAlloc;
+    occupiedChunks.push_back(newChunk);
+    return newChunk->space;
 };
 
 void dealloc(void * chunk){
