@@ -18,6 +18,7 @@ allocation * firstFit(std::size_t chunkSize){
             return chunk;
         }
     }
+    return nullptr;
 }
 
 allocation * bestFit(std::size_t chunkSize){
