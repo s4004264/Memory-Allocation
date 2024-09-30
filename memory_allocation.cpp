@@ -12,6 +12,26 @@ std::list<allocation*> occupiedChunks;
 std::list<allocation*> freeChunks;
 std::string strategy;
 
+allocation * firstFit(std::size_t chunkSize){
+    for (allocation * chunk : freeChunks){
+        if (chunk->size >= chunkSize){
+            return chunk;
+        }
+    }
+}
+
+allocation * bestFit(std::size_t chunkSize){
+    std::size_t sizeDiff = SIZE_MAX;
+    allocation * bestChunk = nullptr;
+    for (allocation * chunk : freeChunks){
+        if ((chunk->size >= chunkSize) && (chunk->size - chunkSize) < sizeDiff){
+            sizeDiff = chunk->size - chunkSize;
+            bestChunk = chunk;
+        }
+    }
+    return bestChunk;
+}
+
 void * alloc(std::size_t chunkSize){
     if(chunkSize < 32){
         chunkSize = 32;
@@ -47,36 +67,18 @@ void * alloc(std::size_t chunkSize){
         return nullptr;
     }
 
-    allocation * chunk;
-    chunk->size = chunkSize;
-    chunk->space = memAlloc;
-    occupiedChunks.push_back(chunk);
-    return chunk->space;
+    allocation * newChunk;
+    newChunk->size = chunkSize;
+    newChunk->space = memAlloc;
+    occupiedChunks.push_back(newChunk);
+    return newChunk->space;
 };
 
 void dealloc(void * chunk){
 
 };
 
-allocation * firstFit(std::size_t chunkSize){
-    for (allocation * chunk : freeChunks){
-        if (chunk->size >= chunkSize){
-            return chunk;
-        }
-    }
-}
 
-allocation * bestFit(std::size_t chunkSize){
-    std::size_t sizeDiff = SIZE_MAX;
-    allocation * bestChunk = nullptr;
-    for (allocation * chunk : freeChunks){
-        if ((chunk->size >= chunkSize) && (chunk->size - chunkSize) < sizeDiff){
-            sizeDiff = chunk->size - chunkSize;
-            bestChunk = chunk;
-        }
-    }
-    return bestChunk;
-}
 
 
 int main(int argc, char* argv[]){
