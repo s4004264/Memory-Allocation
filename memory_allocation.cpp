@@ -48,7 +48,6 @@ void * alloc(std::size_t chunkSize){
     }else{
         chunkSize = 512;
     }
-    std::cout << chunkSize;
     allocation * chunk;
     if(strategy == "firstfit"){
         chunk = firstFit(chunkSize);
@@ -82,11 +81,15 @@ void * alloc(std::size_t chunkSize){
 void dealloc(void * chunk){
     for (std::list<allocation*>::iterator search = occupiedChunks.begin(); search != occupiedChunks.end(); search++){
         allocation * element = *search;
-        if(element == chunk){
+        std::cout << element->space << " " << chunk << std::endl;
+        if(element->space == chunk){
+            std::cout << "deleting element " << element << std::endl;
             freeChunks.push_back(element);
             occupiedChunks.erase(search);
+            return;
         }
     }
+    std::cout << "chunk not found, no element deleted";
 };
 
 
@@ -104,12 +107,14 @@ int main(int argc, char* argv[]){
         std::cerr << "please enter only 'firstfit' or 'bestfit' as the strategy" << std::endl;
         return 1;
     }
-    std::cout << strategy << std::endl;
     void * num1 = alloc(32);
     void * num2 = alloc(64);
     void * num3 = alloc(128);
     void * num4 = alloc(256);
     void * num5 = alloc(512);
+    std::cout << "element to delete: " << num1 << std::endl;
+    dealloc(num1);
+    dealloc(nullptr);
 
     return 0;
 }
