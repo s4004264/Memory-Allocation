@@ -80,7 +80,12 @@ void * alloc(std::size_t chunkSize){
 };
 
 void dealloc(void * chunk){
-
+    for (allocation * search : occupiedChunks){
+        if (search->space == chunk){
+            freeChunks.push_back(search);
+            occupiedChunks.erase(search);
+        }
+    }
 };
 
 
