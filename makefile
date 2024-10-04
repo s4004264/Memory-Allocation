@@ -1,0 +1,19 @@
+CXX = g++
+CXXFLAGS = -Wall -Werror -std=c++11
+
+FIRSTFIT_EXEC = firstfit
+BESTFIT_EXEC = bestfit
+
+FIRSTFIT_SRC = firstfit.cpp
+BESTFIT_SRC = bestfit.cpp
+
+all: $(FIRSTFIT_EXEC) $(BESTFIT_EXEC)
+
+$(FIRSTFIT_EXEC): $(FIRSTFIT_SRC)
+	$(CXX) $(CXXFLAGS) -o $(FIRSTFIT_EXEC) $(FIRSTFIT_SRC)
+
+$(BESTFIT_EXEC): $(BESTFIT_SRC)
+	$(CXX) $(CXXFLAGS) -o $(BESTFIT_EXEC) $(BESTFIT_SRC)
+
+clean:
+	rm -f $(FIRSTFIT_EXEC) $(BESTFIT_EXEC)
