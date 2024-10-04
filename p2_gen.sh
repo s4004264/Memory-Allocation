@@ -8,7 +8,7 @@ y=1
 # first 33% as alloc
 p=3
 
-first=`echo $(($1 / $p)) |bc -l`
+first=`echo $(($1 / $p))`
 
 while [ $y -le $first ]
 do 

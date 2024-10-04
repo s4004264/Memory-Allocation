@@ -2,6 +2,10 @@
 #include <list>
 #include <cstdlib>
 #include <unistd.h>
+#include <string>
+#include <fstream>
+#include <sstream>
+#include <exception>
 
 struct allocation{ 
 std::size_t size; 
@@ -10,12 +14,11 @@ void *space;
 
 std::list<allocation*> occupiedChunks;
 std::list<allocation*> freeChunks;
-std::string strategy;
+std::string strategy = "bestfit";
 
 allocation * firstFit(std::size_t chunkSize){
     allocation * nullChunk = nullptr;
     for (allocation * chunk : freeChunks){
-        std::cout << chunk;
         if (chunk->size >= chunkSize){
             return chunk;
         }
@@ -36,7 +39,6 @@ allocation * bestFit(std::size_t chunkSize){
 }
 
 void * alloc(std::size_t chunkSize){
-    std::cout << chunkSize;
     if(chunkSize < 32){
         chunkSize = 32;
     }else if(chunkSize < 64){
@@ -54,7 +56,7 @@ void * alloc(std::size_t chunkSize){
     }else if(strategy == "bestfit"){ 
         chunk = bestFit(chunkSize);
     }else{
-        std::cerr << "strategy value not valid" << std::endl;
+        std::cerr << "Error: strategy value not valid" << std::endl;
         return nullptr;
     }
 
@@ -67,7 +69,7 @@ void * alloc(std::size_t chunkSize){
 
     void * memAlloc = sbrk(chunkSize);
     if (memAlloc == (void*)-1){
-        std::cerr << "failed to allocate " << chunkSize << " bytes of memory" << std::endl;
+        std::cerr << "Error: failed to allocate " << chunkSize << " bytes of memory" << std::endl;
         return nullptr;
     }
 
@@ -81,40 +83,68 @@ void * alloc(std::size_t chunkSize){
 void dealloc(void * chunk){
     for (std::list<allocation*>::iterator search = occupiedChunks.begin(); search != occupiedChunks.end(); search++){
         allocation * element = *search;
-        std::cout << element->space << " " << chunk << std::endl;
         if(element->space == chunk){
-            std::cout << "deleting element " << element << std::endl;
             freeChunks.push_back(element);
             occupiedChunks.erase(search);
             return;
         }
     }
-    std::cout << "chunk not found, no element deleted";
+    throw std::runtime_error("No chunk found");
 };
 
 
 
 
 int main(int argc, char* argv[]){
-    if(argc != 3){
-        std::cerr << "Please enter arguments in the form ./memory_allocation <strategy> <datafile>" << std::endl;
+    if(argc != 2){
+        std::cerr << "Please enter arguments in the form ./<strategy> <datafile>" << std::endl;
         return 1;
     }
 
-    strategy = argv[1];
-    if((strategy != "firstfit") && (strategy != "bestfit")){
-        std::cout << "you entered " << strategy << std::endl;
-        std::cerr << "please enter only 'firstfit' or 'bestfit' as the strategy" << std::endl;
+
+    std::ifstream datafile(argv[1]);
+    if(!datafile.is_open()){
+        std::cerr << "Error: Could not open file " << argv[1] << std::endl;
         return 1;
     }
-    void * num1 = alloc(32);
-    void * num2 = alloc(64);
-    void * num3 = alloc(128);
-    void * num4 = alloc(256);
-    void * num5 = alloc(512);
-    std::cout << "element to delete: " << num1 << std::endl;
-    dealloc(num1);
-    dealloc(nullptr);
+
+
+    std::string line;
+    void * recentMem;
+    void * allocTest;
+    while(std::getline(datafile, line)){
+        std::istringstream iss(line);
+        std::string command;
+        iss >> command;
+
+        if(command == "alloc:"){
+            std::size_t size;
+            iss >> size;
+            allocTest = alloc(size);
+            if (allocTest == nullptr){
+                std::cerr << "Error: Memory failed to allocate" << std::endl;
+                datafile.close();
+                return 1;
+            }
+        }else if(command == "dealloc"){
+            dealloc(recentMem);
+        }else{
+            std::cerr << "Error: Invalid command in datafile, skipping" << std::endl;
+        }
+        recentMem = occupiedChunks.back()->space;
+    }
+
+    std::cout << "Occupied Chunks:" << std::endl;
+    for (allocation *chunk : occupiedChunks) {
+        std::cout << "Address: " << chunk->space << ", Size: " << chunk->size << std::endl;
+    }
+
+    std::cout << "Free Chunks:" << std::endl;
+    for (allocation *chunk : freeChunks) {
+        std::cout << "Address: " << chunk->space << ", Size: " << chunk->size << std::endl;
+    }
+
+    datafile.close();
 
     return 0;
 }
