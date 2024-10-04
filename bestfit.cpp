@@ -5,7 +5,7 @@
 #include <string>
 #include <fstream>
 #include <sstream>
-#include <exception>
+#include <stdexcept>
 
 struct allocation{ 
 std::size_t size; 
